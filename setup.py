@@ -8,6 +8,6 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        'numpy'
+        'pandas'
         ],
     tests_require=['pytest-cov', 'pytest'])
