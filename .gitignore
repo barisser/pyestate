@@ -1,0 +1,11 @@
+*~
+venv*
+*.pyc
+*.egg-info*
+build*
+dist*
+*.c
+*pycache*
+*.so
+*.html
+*.coverage
