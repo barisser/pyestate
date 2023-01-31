@@ -88,3 +88,41 @@ def financial_schedule(asset_price, LTV, interest, n_payments, property_tax_rate
 
 	return data
 
+
+def note_yield(price, unpaid, rate, payments):
+	"""
+	Given a mortgage note with unpaid balance and rate and number of remaining payments,
+	at a certain tradeable price, what is the equivalent yield?
+	This means, if this were a freshly issued note at the traded price, what would the interest
+	rate have to be to supply the exact same payment schedule?
+
+	Start with this equation:
+	Total payment = principal * i*(1+i)^N / ((1+i)^N - 1) = price * i2 * (1+i2)^N / ((1+i2)^N-1)
+	Total payment is conserved so take the expression
+	price * i*(1+i)^N / ((1+i)^N - 1), use binary search to select i such that this
+	equals the original total payment.  I dont know of a clean analytical way
+	to find this value.
+	"""
+	def _iterate(i, n):
+		i2 = (1.+i)**(1/12.)-1.
+		return i2*(1.+i2)**n / ((1.+i2)**n - 1.)
+	# target is value of i such that iterate(i, n) == total_payment / price within some tolerance
+	tol = 1e-5
+	df = fixed_rate_amortization(unpaid, rate, payments)
+	total_payment = (df['interest_payment'] + df['principal_payment']).iloc[0]
+	target = total_payment / price
+	left, right = -1, 10.
+	while right - left > tol:
+		mid = right / 2. + left / 2.
+		val = _iterate(mid, payments)
+		if val > target:
+			right = mid
+		else:
+			left = mid
+
+	effective_rate = mid
+	return effective_rate
+
+
+
+
